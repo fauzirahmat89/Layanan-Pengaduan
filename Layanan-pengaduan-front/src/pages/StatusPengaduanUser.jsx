@@ -1,38 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 function StatusPengaduanUser({ userId }) {
-  const pengaduanData = [
-    {
-      id: 1,
-      id_user: 101,
-      id_pengaduan: 201,
-      status: 'Berhasil',
-      judul: 'Pengaduan Jalan Rusak',
-      tanggal: '2023-10-20',
-      lokasi: 'Jalan Merdeka',
-      instansi: 'Dinas Perhubungan',
-      kategori: 'Perhubungan',
-      isi: 'Jalan utama menuju pusat kota sangat rusak dan banyak lubang, sangat membahayakan bagi pengendara terutama di malam hari.'
-    },
-    {
-      id: 2,
-      id_user: 102,
-      id_pengaduan: 202,
-      status: 'Sedang Diproses',
-      judul: 'Pelayanan Kesehatan',
-      tanggal: '2023-10-21',
-      lokasi: 'Klinik Sehat',
-      instansi: 'Dinas Kesehatan',
-      kategori: 'Kesehatan',
-      isi: 'Waktu tunggu pelayanan kesehatan di Klinik Sehat sangat lama, memerlukan efisiensi agar tidak membuang waktu pasien.'
-    }
-  ];
+  const [pengaduanData, setPengaduanData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const filteredData = pengaduanData.filter(p => p.id_user === userId);
-  console.log('Filtered Data:', filteredData); // Log untuk debugging
+  useEffect(() => {
+    // Fungsi untuk mengambil data pengaduan dari API
+    const fetchPengaduanData = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/pengaduan/${userId}`);
+        
+        if (!response.ok) {
+          throw new Error('Gagal mengambil data pengaduan');
+        }
+
+        const data = await response.json();
+        setPengaduanData(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPengaduanData();
+  }, [userId]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (pengaduanData.length === 0) {
+    return <div>Tidak ada data pengaduan.</div>;
+  }
 
   return (
-    <div className="max-w-4xl mx-auto mt-10">
+    <div className="max-w-7xl mx-auto mt-10">
       <h1 className="text-xl font-bold text-gray-700 mb-6">Status Pengaduan Anda</h1>
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full leading-normal">
@@ -65,16 +73,16 @@ function StatusPengaduanUser({ userId }) {
             </tr>
           </thead>
           <tbody>
-            {filteredData.map((item) => (
+            {pengaduanData.map((item) => (
               <tr key={item.id_pengaduan}>
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                  {item.id_pengaduan}
+                  {item.id}
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                  {item.judul}
+                  {item.judul_laporan}
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                  {item.tanggal}
+                  {Date(item.tanggal)}
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                   {item.lokasi}

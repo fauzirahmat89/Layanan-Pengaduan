@@ -41,9 +41,9 @@ exports.register = async (req, res) => {
     });
 };
 
-// Fungsi untuk menangani permintaan GET ID berdasarkan nama dan nomor
+// Fungsi untuk menangani permintaan POST ID berdasarkan nama dan nomor
 exports.getUserId = async (req, res) => {
-    const { nama, nomor } = req.query;
+    const { nama, nomor } = req.body; // Ambil nama dan nomor dari body JSON
 
     // Periksa apakah nama dan nomor sudah disertakan
     if (!nama || !nomor) {

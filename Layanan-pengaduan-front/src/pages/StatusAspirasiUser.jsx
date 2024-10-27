@@ -1,38 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 function StatusAspirasiUser({ userId }) {
-  // Data dummy untuk status aspirasi khusus user yang login
-  const aspirasiData = [
-    {
-      id: 1,
-      id_user: 101,
-      id_aspirasi: 301,
-      status: 'Diterima',
-      judul: 'Perbaikan Fasilitas Umum',
-      tanggal: '2023-10-22',
-      asal: 'Komunitas Taman',
-      instansi: 'Pemerintah Kota',
-      kategori: 'Ekonomi',
-      isi: 'Usulan untuk penambahan fasilitas umum di area Taman Kota untuk meningkatkan kenyamanan dan keamanan pengunjung.'
-    },
-    {
-      id: 2,
-      id_user: 102,
-      id_aspirasi: 302,
-      status: 'Ditinjau',
-      judul: 'Edukasi Recycling',
-      tanggal: '2023-10-23',
-      asal: 'Sekolah Dasar Pakuwon',
-      instansi: 'Dinas Pendidikan',
-      kategori: 'Pendidikan',
-      isi: 'Mengusulkan program edukasi recycling bagi siswa sekolah dasar untuk meningkatkan kesadaran lingkungan sejak dini.'
-    }
-  ];
+  const [aspirasiData, setAspirasiData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const filteredData = aspirasiData.filter(a => a.id_user === userId);
+  useEffect(() => {
+    // Fungsi untuk mengambil data aspirasi dari API
+    const fetchAspirasiData = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/aspirasi/${userId}`);
+        
+        if (!response.ok) {
+          throw new Error('Gagal mengambil data aspirasi');
+        }
+
+        const data = await response.json();
+        setAspirasiData(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAspirasiData();
+  }, [userId]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (aspirasiData.length === 0) {
+    return <div>Tidak ada data aspirasi.</div>;
+  }
 
   return (
-    <div className="max-w-4xl mx-auto mt-10">
+    <div className="max-w-6xl mx-auto mt-10 ">
       <h1 className="text-xl font-bold text-gray-700 mb-6">Status Aspirasi Anda</h1>
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <table className="min-w-full leading-normal">
@@ -65,16 +73,16 @@ function StatusAspirasiUser({ userId }) {
             </tr>
           </thead>
           <tbody>
-            {filteredData.map((item) => (
+            {aspirasiData.map((item) => (
               <tr key={item.id_aspirasi}>
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                  {item.id_aspirasi}
+                  {item.id}
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                  {item.judul}
+                  {item.judul_aspirasi}
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                  {item.tanggal}
+                  {Date(item.tanggal)}
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                   {item.asal}
@@ -103,3 +111,4 @@ function StatusAspirasiUser({ userId }) {
 }
 
 export default StatusAspirasiUser;
+

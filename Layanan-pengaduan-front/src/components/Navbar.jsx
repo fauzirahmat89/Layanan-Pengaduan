@@ -5,22 +5,29 @@ import { Link, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false); // State untuk memeriksa apakah pengguna adalah admin
   const navigate = useNavigate(); // Gunakan useNavigate untuk redirect
 
-  // Periksa token untuk menentukan apakah pengguna sudah login
+  // Periksa token dan status admin untuk menentukan apakah pengguna sudah login
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('authToken') || localStorage.getItem('adminToken'); // Periksa token user atau admin
+    const adminStatus = localStorage.getItem('adminToken'); // Periksa apakah admin login
+    
     if (token) {
       setIsAuthenticated(true);
+      setIsAdmin(!!adminStatus); // Jika ada adminToken, set isAdmin menjadi true
     } else {
       setIsAuthenticated(false);
+      setIsAdmin(false); // Set isAdmin menjadi false jika bukan admin
     }
   }, []);
 
   // Fungsi untuk logout
   const handleLogout = () => {
-    localStorage.removeItem('authToken'); // Hapus token dari localStorage
+    localStorage.removeItem('authToken'); // Hapus token user
+    localStorage.removeItem('adminToken'); // Hapus token admin jika ada
     setIsAuthenticated(false); // Ubah status isAuthenticated
+    setIsAdmin(false); // Ubah status isAdmin
     navigate('/login'); // Redirect ke halaman login
   };
 
@@ -29,25 +36,36 @@ const Navbar = () => {
       <Case>
         <div className="flex justify-around items-center">
           <div>
-            {isAuthenticated ? (<>
-                <Link
+            {isAuthenticated ? (
+              <Link
                 className="mr-2 text-sm font-semibold uppercase text-white"
                 to={'/'}
-                >
+              >
                 Layanan Pengaduan
-                </Link>
-            </>) : (<>
-                <Link
+              </Link>
+            ) : (
+              <Link
                 className="mr-2 text-sm font-semibold uppercase text-white"
-                >
+              >
                 Layanan Pengaduan
-                </Link>
-            </>)}
-
+              </Link>
+            )}
           </div>
           <div>
-            {/* Hanya tampilkan link Home dan lainnya jika pengguna sudah login */}
-            {isAuthenticated ? (
+            {/* Jika pengguna adalah admin, tampilkan navigasi admin */}
+            {isAuthenticated && isAdmin ? (
+              <>
+                <NavLink href="/AdminPengaduan">Admin Pengaduan</NavLink>
+                <NavLink href="/AdminAspirasi">Admin Aspirasi</NavLink>
+                <button
+                  onClick={handleLogout}
+                  className="inline-flex px-4 py-2 text-blue-300 hover:text-white"
+                >
+                  Logout
+                </button>
+              </>
+            ) : isAuthenticated ? (
+              /* Jika bukan admin (user biasa) */
               <>
                 <NavLink href="/">Home</NavLink>
                 <NavLink href="/about">About</NavLink>

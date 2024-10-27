@@ -1,3 +1,5 @@
-login sudah selesai.
+npm run dev untuk front
+nodemon app untuk back (gunakan yang newfolder)
+
 
 error bagian back end input form pengaduan
